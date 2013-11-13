@@ -37,4 +37,5 @@ doc/
 
 #ignore configuration changes
 config/github_credentials.yml
+.idea
 
