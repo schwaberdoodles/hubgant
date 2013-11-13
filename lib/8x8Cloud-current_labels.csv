@@ -1,0 +1,20 @@
+zerigomain,Bug,Feature Request,Low Priority,SoftBank
+zerigomanage,Blocking Defect,CoSentry,Feature Request,For Verify,LP,Requirement Accepted,Requirement Issue,Requirement Rejected,SoftBank
+zerigons,Blocking Defect,Bug,Cannot Verify or Reproduce,Feature Request,For verification,High Priority,LP,Low Priority,Medium Priority,Pending/Monitoring,SoftBank
+zerigomonitor,Bug,For verification,High Priority,LP,SoftBank
+zerigovps,Blocking Issue,Feature Request,For Verification,High Priority,LP,Low Priority,Medium Priority,SoftBank
+zerigocommon,CoSentry,For verification,High Priority,LP,SoftBank,Upgrade
+url_redirector,Bug
+vbroker,Blocking Defect,Bug,Cannot Verify or Reproduce,Feature Request,For Verify,High Priority,Low Priority,Medium
+QuoteBuilder,Blocking Defect,Bug,Design,Feature Request,High Priority,Low Priority,Medium Priority,Question
+zerigocloud,Blocking Defect,Bug,Cannot Verify or Reproduce,CoSentry,Feature Request,For Verify,High Priority,LP,Low Priority,Medium Priority,Pending/Monitoring,SoftBank,WillBradley,Wrong Project
+CloudMarketing,bug,duplicate,enhancement,invalid,question,wontfix
+watchdog-hbase,bug,duplicate,enhancement,invalid,question,wontfix
+zerigoops,CoSentry,SoftBank,bug,duplicate,enhancement,hot,invalid,low,question,wontfix
+vBroker-2.0,bug,duplicate,enhancement,invalid,question,wontfix
+vcloudpxe,bug,duplicate,enhancement,invalid,question,wontfix
+PowerShellCustomizers,bug,duplicate,enhancement,invalid,question,wontfix
+zerigovdi,Bug,Duplicate,Enhancement,For verification,High Priority,Invalid,LP,ON HOLD,Question,Requirement Valid,Requirements Issue,SoftBank
+vdi-stats,bug,duplicate,enhancement,invalid,question,wontfix
+dr_probe,bug,duplicate,enhancement,invalid,question,wontfix
+zerigoevents,bug,duplicate,enhancement,invalid,question,wontfix
