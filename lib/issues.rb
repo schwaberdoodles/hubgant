@@ -5,7 +5,7 @@ require 'date'
 class GitHubProjectSummarizer
 
   USERNAME="rljohnsn" 	# github username
-  PASSWORD="xfactor12"	# github password
+  PASSWORD=""	# github password
   USER="8x8Cloud"	# github organization
   TIMEZONE_OFFSET="-8"
 
