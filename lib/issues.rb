@@ -4,9 +4,9 @@ require 'date'
 
 class GitHubProjectSummarizer
 
-  USERNAME="rljohnsn" 	# github username
-  PASSWORD="solar10"	# github password
-  ORG="8x8Cloud"	# github organization
+  USERNAME="" 	# github username
+  PASSWORD=""	# github password
+  ORG=""	# github organization
   TIMEZONE_OFFSET="-8"
 
   def initialize
@@ -25,33 +25,6 @@ class GitHubProjectSummarizer
     client
   end
 
-=begin
-  def projects
-    ['zerigocloud',
-     'zerigocommon',
-     'zerigoevents',
-     'zerigomain',
-     'zerigomanage',
-     'zerigomonitor',
-     'zerigons',
-     'zerigoops',
-     'zerigovdi',
-     'zerigovps',
-     'zerigopartner',
-     'PowerShellCustomizers',
-     'vBroker-2.0',
-     'vAutomate'
-    ]
-  end
-=end
-
-  # test repos
-  def projects
-    ['superrepo',
-     'submodule01',
-     'submodule02'
-    ]
-  end
 
   # http://flatuicolors.com/#
   # alizarin      #e74c3c blocker
@@ -130,7 +103,7 @@ class GitHubProjectSummarizer
   end
 
   def get_link(user,project,issue)
-    "https://github.com/#{user}/#{project}/issues/#{issue.number}"
+    "https://github.com/#{user}/#{project.name}/issues/#{issue.number}"
   end
 
   def get_milestone(milestone)
@@ -200,7 +173,7 @@ class GitHubProjectSummarizer
     @repos.each do |repo|
       puts("Processing issue labels for #{repo.name}")
       if repo.permissions.admin && repo.has_issues
-        issues = @client.list_issues("#{ORG}/#{repo.name}") #, :state => "open")
+        issues = @client.list_issues("#{ORG}/#{repo.name}",{:per_page => 200}) #, :state => "open")
           issues.each do |issue|
               current_labels = get_labels(issue).gsub('_',' ')
               issue.labels.each do |old_label|
@@ -248,10 +221,10 @@ class GitHubProjectSummarizer
 
   def milestones
     puts "loading milestones..."
-    projects.each do |project|
-      milestones = @client.milestones("#{ORG}/#{project}")
+    @repos.each do |repo|
+      milestones = @client.milestones("#{ORG}/#{repo.name}")
       milestones.each do |milestone|
-        puts milestone.id.to_s + " " + milestone.title
+        puts  milestone.id.to_s + " " + milestone.number.to_s + " " + repo.name + " " + milestone.title
       end
     end
   end
@@ -275,8 +248,8 @@ class GitHubProjectSummarizer
 
   def issues_json
       all_issues = []
-      projects.each do |project|
-        issues = @client.list_issues("#{ORG}/#{project}", :state => "open")
+      @repos.each do |repo|
+        issues = @client.list_issues("#{ORG}/#{repo.name}", {:state => "open", :per_page => 200})
         all_issues << issues
       end
       all_issues
@@ -285,7 +258,7 @@ end
 
 summarizer = GitHubProjectSummarizer.new
 #summarizer.milestones
-summarizer.issues_csv
+#summarizer.issues_csv
 #summarizer.get_org_labels        # DONE
 #summarizer.add_org_labels        # DONE
 #summarizer.update_org_labels     # DONE
