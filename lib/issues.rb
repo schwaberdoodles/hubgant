@@ -4,9 +4,9 @@ require 'date'
 
 class GitHubProjectSummarizer
 
-  USERNAME="" 	# github username
-  PASSWORD=""	# github password
-  ORG=""	# github organization
+  USERNAME="rljohnsn" 	# github username
+  PASSWORD="solar10"	# github password
+  ORG="8x8Cloud"	# github organization
   TIMEZONE_OFFSET="-8"
 
   def initialize
@@ -115,7 +115,7 @@ class GitHubProjectSummarizer
 
   def get_issue_row(project,issue)
     row = [
-        project,
+        project.name,
         issue[:number],
         issue[:title],
         issue[:state],
@@ -124,7 +124,7 @@ class GitHubProjectSummarizer
         issue[:updated_at],
         get_user(issue),
         get_assignee(issue),
-        get_link(USER,project,issue),
+        get_link(ORG,project,issue),
         get_labels(issue)
     ]
   end
@@ -158,6 +158,7 @@ class GitHubProjectSummarizer
 
   def add_org_labels
     @repos.each do |repo|
+      puts("Adding new labels to #{repo.name}")
       # collect existing labels into a single string
       if repo.permissions.admin && repo.has_issues
         old_labels = @client.labels("#{ORG}/#{repo.name}")
@@ -168,7 +169,7 @@ class GitHubProjectSummarizer
         labels.each do |label|
           #if the label already exists, skip it
           next if existing_labels.include? label[:name]
-          puts "Adding new #{label[:name]} label to #{repo.name}"
+          #puts "Adding new #{label[:name]} label to #{repo.name}"
           @client.add_label("#{ORG}/#{repo.name}", "#{label[:name]}", "#{label[:color]}")
         end
       end
@@ -259,13 +260,17 @@ class GitHubProjectSummarizer
     puts "loading issues and saving to issues.csv..."
     csv_output = CSV.new(File.open(File.dirname(__FILE__) + "/issues.csv", 'w'))
     csv_output << header_row
-    projects.each do |project|
-      issues = @client.list_issues("#{ORG}/#{project}", :state => "open")
-      #issues = @client.list_issues("#{ORG}/#{project}", :state => "closed")
+    total=0
+    @repos.each do |repo|
+      issues = @client.list_issues("#{ORG}/#{repo.name}", {:state => "open", :per_page => 200})
+      total += issues.length
+      puts("Processing #{repo.name} with #{issues.length} open issues")
+      #issues = @client.list_issues("#{ORG}/#{repo.name}", :state => "closed")
       issues.each do |issue|
-        csv_output << get_issue_row(project,issue)
+        csv_output << get_issue_row(repo,issue)
       end
     end
+    puts("Exported total of #{total} open issues")
   end
 
   def issues_json
@@ -280,7 +285,7 @@ end
 
 summarizer = GitHubProjectSummarizer.new
 #summarizer.milestones
-#summarizer.issues_csv
+summarizer.issues_csv
 #summarizer.get_org_labels        # DONE
 #summarizer.add_org_labels        # DONE
 #summarizer.update_org_labels     # DONE
