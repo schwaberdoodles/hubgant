@@ -1,5 +1,34 @@
 %h1 HubGant
 
-%ul
-  - @repositories.each do |r|
-    %li= r.name
+%table.display#issues
+  %thead
+    %tr
+      %th Project
+      %th Issue Number
+      %th Title
+      %th State
+      %th Milestone
+      %th Created at
+      %th Updated at
+      %th Created by
+      %th Assigned to
+      %th Labels
+  %tbody
+    - @repositories.each do |r|
+      - Organization.issues(r).each do |i|
+        %tr
+          %td= r.name
+          %td= i.number
+          %td= link_to i.title, issue_link(r, i)
+          %td= i.state
+          %td= i.milestone.try(:title) || ""
+          %td= i.created_at.strftime("%D")
+          %td= i.updated_at.strftime("%D")
+          %td= i.user.login || "nobody"
+          %td= i.assignee.try(:login) || "nobody"
+          %td= issue_labels(i)
+
+:javascript
+  $(function(){
+    $('#issues').dataTable();
+  });

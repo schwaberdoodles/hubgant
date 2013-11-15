@@ -23,10 +23,14 @@ class Organization
       milestones
     end
 
-    def issues
+    def issues(repository = nil)
       issues = []
-      repositories.each do |r|
-        issues += @client.list_issues("#{GITHUB_CONFIG[:org]}/#{r.name}")
+      if repository
+        issues += @client.list_issues("#{GITHUB_CONFIG[:org]}/#{repository.name}")
+      else
+        repositories.each do |r|
+          issues += @client.list_issues("#{GITHUB_CONFIG[:org]}/#{r.name}")
+        end
       end
       issues
     end
