@@ -1,6 +1,7 @@
 require 'octokit'
 require 'csv'
 require 'date'
+require 'json'
 
 class GitHubProjectSummarizer
 
@@ -21,7 +22,7 @@ class GitHubProjectSummarizer
 
   def connect(username,password)
     client = Octokit::Client.new(:login => username, :password => password)
-    Octokit.auto_paginate = true
+    #Octokit.auto_paginate = true
     client
   end
 
@@ -99,6 +100,22 @@ class GitHubProjectSummarizer
       'link',
       'labels'
     ]
+  end
+
+  def get_issue_hash(project,issue)
+    row = {
+        :project    => project.name,
+        :number     => issue[:number],
+        :title      => issue[:title],
+        :state      => issue[:state],
+        :milestone  => get_milestone(issue[:milestone]),
+        :created_at => issue[:created_at],
+        :updated_at => issue[:updated_at],
+        :user       => get_user(issue),
+        :assignee   => get_assignee(issue),
+        :link       => get_link(ORG,project,issue),
+        :labels     => get_labels(issue)
+    }
   end
 
   def get_issue_row(project,issue)
@@ -193,19 +210,19 @@ class GitHubProjectSummarizer
       puts("Processing issue labels for #{repo.name}")
       if repo.permissions.admin && repo.has_issues
         issues = @client.list_issues("#{ORG}/#{repo.name}",{:per_page => 200}) #, :state => "open")
-          issues.each do |issue|
-              current_labels = get_labels(issue).gsub('_',' ')
-              issue.labels.each do |old_label|
-                labels.each do |new_label|
-                   # if the issue already has the new label skip
-                   next if current_labels.include? new_label[:name]
-                   if new_label[:legacy].downcase.include? old_label.name.downcase
-                     puts("Adding #{new_label[:name]} to #{repo.name}/#{issue.title} with #{old_label.name}")
-                     @client.add_labels_to_an_issue("#{ORG}/#{repo.name}",issue.number,[new_label[:name]])
-                   end
-                end
+        issues.each do |issue|
+          current_labels = get_labels(issue).gsub('_',' ')
+          issue.labels.each do |old_label|
+            labels.each do |new_label|
+              # if the issue already has the new label skip
+              next if current_labels.include? new_label[:name]
+              if new_label[:legacy].downcase.include? old_label.name.downcase
+                puts("Adding #{new_label[:name]} to #{repo.name}/#{issue.title} with #{old_label.name}")
+                @client.add_labels_to_an_issue("#{ORG}/#{repo.name}",issue.number,[new_label[:name]])
               end
+            end
           end
+        end
       end
     end
     # remove legacy labels for all repos (automatically removes them from existing issues)
@@ -304,7 +321,7 @@ class GitHubProjectSummarizer
     csv_output << header_row
     total=0
     @repos.each do |repo|
-      issues = @client.list_issues("#{ORG}/#{repo.name}", {:state => "open", :per_page => 1000})
+      issues = @client.list_issues("#{ORG}/#{repo.name}",{:per_page => 1000, :state => "open"})
       total += issues.length
       puts("Processing #{repo.name} with #{issues.length} open issues")
       #issues = @client.list_issues("#{ORG}/#{repo.name}", :state => "closed")
@@ -316,19 +333,29 @@ class GitHubProjectSummarizer
   end
 
   def issues_json
-      all_issues = []
-      @repos.each do |repo|
-        issues = @client.list_issues("#{ORG}/#{repo.name}", {:state => "open", :per_page => 1000})
-        all_issues << issues
+    puts "loading issues and saving to issues.json..."
+    json_output = File.open(File.dirname(__FILE__) + "/issues.json", 'w')
+    #json_output << header_row
+    total=0
+    @repos.each do |repo|
+      issues = @client.list_issues("#{ORG}/#{repo.name}",{:per_page => 1000, :state => "open"})
+      total += issues.length
+      puts("Processing #{repo.name} with #{issues.length} open issues")
+      #issues = @client.list_issues("#{ORG}/#{repo.name}", :state => "closed")
+      issues.each do |issue|
+        json_output << JSON.generate(get_issue_hash(repo,issue))
+        json_output << "\n"
       end
-      all_issues
     end
+    puts("Exported total of #{total} open issues")
+  end
 end
 
 summarizer = GitHubProjectSummarizer.new
 #summarizer.milestones
 #summarizer.issues_csv
-summarizer.get_org_labels        # DONE
+summarizer.issues_json
+#summarizer.get_org_labels        # DONE
 #summarizer.add_org_labels        # DONE
 #summarizer.update_org_labels     # DONE
 #summarizer.sync_org_labels       # DONE
